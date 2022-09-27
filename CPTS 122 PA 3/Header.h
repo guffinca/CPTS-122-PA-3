@@ -22,16 +22,13 @@ typedef struct duration
 
 typedef struct record
 {
-	char Artist[25];
-	char Album[25];
-	char Song[25];
-	char Genre[25];
+	char Artist[50];
+	char Album[50];
+	char Song[50];
+	char Genre[50];
 	Duration Length;
 	int times_played;
 	int Rating;
-	struct record* pPrev;
-	struct record* pNext;
-
 }Record;
 
 typedef struct node
@@ -42,20 +39,29 @@ typedef struct node
 
 }Node;
 
-void main_menu();
-struct Node* make_node(FILE* infile);
-void insert_at_front(struct Node* pHead, FILE* infile);
-void load(FILE* infile);
-void display(struct record* list);
-void store(struct node** pHead, FILE* infile);
-void edit(struct record* head);
-void rate(struct record* head);
-void play(struct record* pHead);
-void shuffle(struct record* pHead);
-int insert(Record** pHead, FILE* infile);
-void delete(Record** pHead);
-void exit_function(struct node* pHead, FILE* infile);
+typedef struct list
+{
+	Node* pHead;
+}List;
 
+void main_menu();
+Node* make_node(Record newRecord);
+void insert_at_front(List* pHead, Record newRecord);
+int parseData(char* lines, Record* music_record, int lineNumber);
+void display(const List* pList);
+void store(struct List** pHead, FILE* infile);
+void edit(struct List* head);
+void rate(List* head);
+void play(List* pHead);
+void shuffle(List* pHead);
+int insert(List** pHead, Record *newRecord);
+void delete(List** plist);
+void exit_function(struct List** pHead, FILE* infile);
+void sort(List* pHead);
+void swap_rating(Node* ptr1, Node* ptr2);
+void SortByRank(List* pHead);
+void swap_timesPlayed(Node* ptr1, Node* ptr2);
+void SortByTimesPlayed(List* pHead);
 
 
 

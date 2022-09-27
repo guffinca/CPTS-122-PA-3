@@ -1,85 +1,107 @@
 #include "Header.h"
 
+/*
+
+*/
+
+
+
+
 int main(void)
 {
-    
-    Record* pHead = NULL;
-    Record* pCur = pHead;
-    FILE* infile = NULL;
-    infile = fopen("list.csv", "r+");
+   
+    FILE* infile = fopen("list.csv","r+");
+
+    char lines[200][50] = { "" };
+    int temp = 0;
+    Record newRecord = { "",-1 };
+    List pList = { NULL };
+    List** list = NULL;
+    int success = 0;
 
     if (infile != NULL)
     {
-        
-        main_menu();
-
         int choice = 0;
         do {
+            
+            main_menu();
             printf("Enter your choice of action: ");
             scanf(" %d", &choice);
-        } while ((choice < 1) && (choice > 10));
-
-        switch (choice)
-        {
-        case 1:
-            load(infile);
-            system("clear");
-            break;
-
-        case 2:
-            store(pHead, infile);
-            system("clear");
-            break;
-
-        case 3:
-            display(pHead);
-            system("clear");
-            break;
-
-        case 4:
-
-
-            system("clear");
-            break;
-
-        case 5:
-
-
-            system("clear");
-            break;
-
-        case 6:
-            edit(pHead);
-            system("clear");
-            break;
-
-        case 7:
-
-
-            system("clear");
-            break;
-
-        case 8:
-            rate(pHead);
-            system("clear");
-            break;
-
-        case 9:
-            play(pHead);
-            system("clear");
-            break;
-
-        case 10:
-            shuffle(pHead);
-            system("clear");
-            break;
-
-        case 11:
             
-            
-            break;
-        }
-        
+            switch (choice)
+            {
+            case 1:
+                
+
+
+                while (fgets(lines[temp], 200, infile) != NULL)
+                {
+
+                    parseData(lines, &newRecord, temp);
+                    insert_at_front(&pList, newRecord);
+
+                    
+                    
+                }
+                
+              
+                break;
+
+            case 2:
+                store(&pList, infile);
+                
+                break;
+
+            case 3:
+                
+                display(&pList);
+               
+                break;
+
+            case 4:
+                insert(&pList, &newRecord);
+
+                
+                break;
+
+            case 5:
+                delete(&pList);
+
+                
+                break;
+
+            case 6:
+                edit(&pList);
+                
+                break;
+
+            case 7:
+                
+
+                
+                break;
+
+            case 8:
+                rate(&pList);
+               
+                break;
+
+            case 9:
+                play(&pList);
+                
+                break;
+
+            case 10:
+                
+                
+                break;
+
+            case 11:
+                
+                exit(0);
+                break;
+            }
+        } while (choice != 11);
     }
     else
     {
