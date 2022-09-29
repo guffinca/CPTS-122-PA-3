@@ -1,6 +1,12 @@
 #include "Header.h"
 
 /*
+        Programmer - Caden Guffin
+        Class - CPTS 122
+        Assignment - Programing Assignment 3
+        Due Date - 9/28/2022
+
+        Recived Help From Matt Wolfe, on function Parse data
 
 */
 
@@ -14,9 +20,12 @@ int main(void)
 
     char lines[200][50] = { "" };
     int temp = 0;
+    int lines_number = 0;
     Record newRecord = { "",-1 };
     List pList = { NULL };
-    List** list = NULL;
+    List** list = &pList;
+   
+    Node *pNode = { NULL };
     int success = 0;
 
     if (infile != NULL)
@@ -34,17 +43,17 @@ int main(void)
                 
 
 
-                while (fgets(lines[temp], 200, infile) != NULL)
+                while (fgets(lines[temp],200, infile) != NULL)
                 {
 
                     parseData(lines, &newRecord, temp);
                     insert_at_front(&pList, newRecord);
 
-                    
-                    
+                   
+                   
                 }
-                
-              
+                 
+               
                 break;
 
             case 2:
@@ -59,7 +68,7 @@ int main(void)
                 break;
 
             case 4:
-                insert(&pList, &newRecord);
+                insert(list, newRecord);
 
                 
                 break;
@@ -77,7 +86,7 @@ int main(void)
 
             case 7:
                 
-
+                sort(&pList);
                 
                 break;
 
@@ -93,11 +102,11 @@ int main(void)
 
             case 10:
                 
-                
+                shuffle(&pList);
                 break;
 
             case 11:
-                
+                store(&pList, infile);
                 exit(0);
                 break;
             }

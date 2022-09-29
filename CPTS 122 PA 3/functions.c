@@ -45,7 +45,11 @@ void insert_at_front(List *pHead, Record newRecord)
 {
     Node* pMem = make_node(newRecord);
     int success = 0;
-    if (pMem != NULL)
+    if (pHead->pHead == NULL)
+    {
+        pHead->pHead = pMem;
+    }
+    else
     {
         success = 1;
 
@@ -59,51 +63,53 @@ void insert_at_front(List *pHead, Record newRecord)
 
 
 
-//Worked on Function with Matt Wolfe
+//Recieved help on the parse Data function from Matt Wolfe
 
-int parseData(char* lines, Record *music_record, int lineNumber)
+int parseData(char* line, Record *music_record, int Number)
 {
-    
-    if (lines[0] =='\"')
+    //Checks and sees if artist has "", checks to see if its a full name
+    if (line[0] =='\"')
     {
-        strcpy(music_record[lineNumber].Artist, strtok(lines, ","));
-        strcat(music_record[lineNumber].Artist, strtok(NULL, ","));
+        strcpy(music_record[Number].Artist, strtok(line, ","));
+        strcat(music_record[Number].Artist, strtok(NULL, ","));
 
     }
     else
     {
-        strcpy(music_record[lineNumber].Artist, strtok(lines, ","));
+        strcpy(music_record[Number].Artist, strtok(line, ","));
     }
-    strcpy(music_record[lineNumber].Album, strtok(NULL, ","));
-    strcpy(music_record[lineNumber].Song, strtok(NULL, ","));
-    strcpy(music_record[lineNumber].Genre, strtok(NULL, ","));
-    music_record[lineNumber].Length.minutes = atoi(strtok(NULL, ":"));
-    music_record[lineNumber].Length.seconds = atoi(strtok(NULL, ","));
-    music_record[lineNumber].times_played = atoi(strtok(NULL, ","));
-    music_record[lineNumber].Rating = atoi(strtok(NULL, "\n"));
+    //copys record into token
+    strcpy(music_record[Number].Album, strtok(NULL, ","));
+    strcpy(music_record[Number].Song, strtok(NULL, ","));
+    strcpy(music_record[Number].Genre, strtok(NULL, ","));
+    music_record[Number].Length.minutes = atoi(strtok(NULL, ":"));
+    music_record[Number].Length.seconds = atoi(strtok(NULL, ","));
+    music_record[Number].times_played = atoi(strtok(NULL, ","));
+    music_record[Number].Rating = atoi(strtok(NULL, "\n"));
 
    
 }
-void display(List* pList)
+void display(const List* pList)
 {
     int i = 0;
     char choice[50];
-    
+    //allows input for see all songs or by just one artist
     do
     {
         printf("Enter 1 to see all songs\n");
-        printf("Enter 2 to see songs by one artist");
+        printf("Enter 2 to see songs by one artist\n");
         scanf("%d", &i);
 
     } while ((i != 1) && (i != 2));
     system("cls");
  
-    Node* current_song = pList->pHead;
+    Node* current_song = pList->pHead; //Goes to top of list
     if (i == 1)
     {
-       
+        
         while (current_song != NULL)
         {
+            
             printf("Song: %s\n", current_song->Data.Song);
             printf("Artist: %s\n", current_song->Data.Artist);
             printf("Album: %s\n", current_song->Data.Album);
@@ -112,21 +118,31 @@ void display(List* pList)
             printf("Times Played: %d\n", current_song->Data.times_played);
             printf("RATING: %d\n\n", current_song->Data.Rating);
 
-            current_song = current_song->pNext;
+            current_song = current_song->pNext; //Goes on to next record and prints it to screen
 
         }
       
     }
     else if(i == 2)
     {
-        printf("Please enter the Artist you want to see");
+        
+        printf("Please enter the Artist you want to see: ");
         getchar();
         fgets(choice, 50, stdin);
+        choice[strlen(choice) - 1] = '\n';
         choice[strlen(choice) - 1] = '\0';
-        if (strcmp(choice, current_song->Data.Artist) == 0)
-        {
+        
+       
 
-           
+
+            while (strcmp(choice, current_song->Data.Artist) != 0) //Runs loop until it finds the artist that is being looked for
+            {
+                current_song = current_song->pNext;
+            }
+
+            if (strcmp(choice, current_song->Data.Artist) == 0) //sees artist name within record and prints it to the sc
+            {
+
                 printf("Song: %s\n", current_song->Data.Song);
                 printf("Artist: %s\n", current_song->Data.Artist);
                 printf("Album: %s\n", current_song->Data.Album);
@@ -137,61 +153,63 @@ void display(List* pList)
 
 
 
-        }
+
+            }
+        
     }
 }
 
-void store(struct List** pHead, FILE *infile)
+void store( List* pHead, FILE *infile)
 {
-    struct node* current = pHead;
+     Node* current =pHead->pHead;
 
-    while (current->pNext != NULL)
+
+    while (current != NULL)
     {
+        
+        fprintf(infile, "%s,%s,%s,%s,%d:%d,%d,%d\n", current->Data.Artist, current->Data.Album, current->Data.Song, current->Data.Genre, current->Data.Length.minutes, current->Data.Length.seconds, current->Data.times_played, current->Data.Rating);
+        printf("%s,%s,%s,%s,%d:%d,%d,%d\n", current->Data.Artist, current->Data.Album, current->Data.Song, current->Data.Genre, current->Data.Length.minutes, current->Data.Length.seconds, current->Data.times_played, current->Data.Rating);
         current = current->pNext;
     }
-
-    while (current->pPrev != NULL)
-    {
-        fprintf(infile, "%s,%s,%s,%s,%d:%d,%d,%d", current->Data.Artist, current->Data.Album, current->Data.Song, current->Data.Genre, current->Data.Length.minutes, current->Data.Length.seconds, current->Data.times_played, current->Data.Rating);
-        printf("%s,%s,%s,%s,%d:%d,%d,%d", current->Data.Artist, current->Data.Album, current->Data.Song, current->Data.Genre, current->Data.Length.minutes, current->Data.Length.seconds, current->Data.times_played, current->Data.Rating);
-        current = current->pPrev;
-    }
 }
 
-void edit(struct List* head)
+void edit( List* head)
 {
-    struct node* current = head;
+    struct node* current = head ->pHead;
     
-    char edit[25];
-    char search[25];
+    char edit[50];
+    char search[50];
     int temp = 0;
     int choice = 0;
     printf("Enter the artist to search: ");
     
     getchar();
-    fgets(search, 25, stdin);
+    fgets(search, 50, stdin);
     search[strlen(search) - 1] = '\0';
     // Allows input of Artist wanted to edit
     
     while (current != NULL & choice == 0)
     {
-
+        while (strcmp(search, current->Data.Artist) != 0)
+        {
+            current = current->pNext;
+        }
         if (strcmp(search, current->Data.Artist) == 0)
         {
 
             printf("Which field do you want to edit?\n");
             printf("1) Artist\n2) Album\n3) Song\n4) Genre\n5) Length\n6) Number of plays\n");
             //Prints out choice for which field they would like to edit
-            scanf(" %d", &choice);
+            scanf("%d", &choice);
 
             switch (choice)
             {
             case 1:
                 //Allows edit of Artist name and copys edit into the struct
                 printf("Enter the new artist: ");
-                while ((getchar()) != "\n");
+                getchar();
                 fgets(edit, 50, stdin);
-                edit[strlen(edit) - 1] = NULL;
+                edit[strlen(edit) - 1] = '\0';
                 strcpy(current->Data.Artist, edit);
 
                 printf("The new artist is %s\n", current->Data.Artist);
@@ -199,18 +217,18 @@ void edit(struct List* head)
             case 2:
                 //Allows edit of Album title and copys edit into the Struct
                 printf("Enter the new album: ");
-                while ((getchar()) != "\n");
+                getchar();
                 fgets(edit, 50, stdin);
-                edit[strlen(edit) - 1] = NULL;
+                edit[strlen(edit) - 1] = '\0';
                 strcpy(current->Data.Album, edit);
                 printf("The new album is %s\n", current->Data.Album);
                 break;
             case 3:
                 //Allows edit of song title and copys edit into struct
                 printf("Enter the new Song title: ");
-                while ((getchar()) != "\n");
+                getchar();
                 fgets(edit, 50, stdin);
-                edit[strlen(edit) - 1] = NULL;
+                edit[strlen(edit) - 1] = '\0';
                 strcpy(current->Data.Song, edit);
                
                 printf("The new Song is %s\n", current->Data.Song);
@@ -218,9 +236,9 @@ void edit(struct List* head)
             case 4:
                 //Allows edit of genre and copys edit into struct
                 printf("Enter the new genre: ");
-                while ((getchar()) != "\n");
+                getchar();
                 fgets(edit, 50, stdin);
-                edit[strlen(edit) - 1] = NULL;
+                edit[strlen(edit) - 1] = '\0';
                 strcpy(current->Data.Genre, edit);
                 printf("The new genre is %s\n", current->Data.Genre);
                 break;
@@ -235,43 +253,51 @@ void edit(struct List* head)
                 break;
             case 6:
                 //Allows user to input amount of times song has been played
-                printf("Enter the new number of plays: ");
-                scanf("%d", &temp);
-                current->Data.times_played = temp;
+                do
+                {
+                    printf("Enter the new number of plays: ");
+                    scanf("%d", &temp);
+                    current->Data.times_played = temp;
+                } while (temp < 0);
                 break;
 
             }
 
         }
-        current = current->pNext;
-        choice = 0;
+        
+        
     }
 }
 
-void rate(struct List* head)
+void rate(List* head)
 {
-    struct node* cur = head;
+    struct node* cur = head ->pHead;
    
     char search_artist[50];
 
-    printf("Enter Artist to Rate");
+    printf("Enter Artist to Rate\n");
     getchar();
-        fgets(search_artist, 50, stdin);
-      
+     fgets(search_artist, 50, stdin);
+     search_artist[strlen(search_artist) - 1] = '\n';
+     search_artist[strlen(search_artist) - 1] = '\0';
    
     while ((cur != NULL))
     {
+        while (strcmp(search_artist, cur->Data.Artist) != 0)
+        {
+            cur = cur->pNext;
+        }
         if (strcmp(search_artist, cur->Data.Artist) == 0)
         {
             int new_rating = 0;
               do 
               {   
-                    printf("Enter Your rating for the Song between 1 and 5:");
+                    printf("Enter Your rating for the Song between 1 and 5: ");
                     scanf("%d", &new_rating);
-              } while ((new_rating >= 1) & (new_rating <= 5));
+              } while ((new_rating <= 1)&(new_rating >= 5));
 
                 cur->Data.Rating = new_rating;
-                printf("The New rating is now: %d", cur->Data.Rating);
+                printf("The New rating is now: %d\n", cur->Data.Rating);
                 return;
             
         }
@@ -282,42 +308,48 @@ void rate(struct List* head)
 }
 
 
-void play( List *pHead)
+void play(List *pHead)
 {
-    struct node* pCur = pHead;
-    char choice[50];
+    struct node* pCur = pHead ->pHead;
+    char choice[200];
     int play = 0;
 
     //Gets song choice
     printf("Enter a song to start with: ");
     getchar();
     fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
     choice[strlen(choice) - 1] = '\0';
-
+    while (strcmp(choice, pCur->Data.Song) != 0)
+    {
+        pCur = pCur->pNext;
+    }
 
     while (pCur != NULL)
     {
-
+        
         if (strcmp(choice, pCur->Data.Song) == 0)
         {
            
-            
-                printf("Artist %s", pCur->Data.Artist);
-                printf("Album %s", pCur->Data.Album);
-                printf("Song %s", pCur->Data.Song);
-                printf("Genre %s", pCur->Data.Genre);
-                printf("Duration %d:%d", pCur->Data.Length.minutes, pCur->Data.Length.seconds);
-                printf("Times Player %d", pCur->Data.times_played);
-                printf("Rating %d", pCur->Data.Rating);
-                
+            while (pCur != NULL)
+            {
+                printf("Artist: %s\n", pCur->Data.Artist);
+                printf("Album: %s\n", pCur->Data.Album);
+                printf("Song: %s\n", pCur->Data.Song);
+                printf("Genre: %s\n", pCur->Data.Genre);
+                printf("Duration: %d:%d\n", pCur->Data.Length.minutes, pCur->Data.Length.seconds);
+                printf("Times Player: %d\n", pCur->Data.times_played);
+                printf("Rating: %d", pCur->Data.Rating);
+
                 //Sleep function will run for 5 seconds
                 //Deleted Count function as i relised it was not needed
                 Sleep(5000);
-                
-           
-            system("cls");
+
+                pCur = pCur->pNext;
+                system("cls");
+            }
         }
-        pCur = pCur->pNext;
+        
         
     }
 
@@ -327,50 +359,34 @@ void play( List *pHead)
 
 void shuffle(List* pHead)
 {
-    int songs = 0;
-    Node*pCur = pHead;
-    while (pCur != NULL)
+    int i = 0,k=0;
+    Node* pCur = pHead->pHead;
+    char cur[50] = { NULL };
+
+    
+    for (i = 0; i <= 10; i++)
     {
-        pCur = pCur->pNext;
-        songs++;
+        cur[i] = pCur->Data.Song;
+        cur[i] = pCur->pNext;
     }
+   
+    i = rand() % 10 + 1;
 
-    pCur = pHead;
-    int *songsPlayed = (int*)malloc(sizeof(int));
-    int randomSong,songfound =0;
-
-    randomSong = rand() % songs + 1;
-
-    if (songsPlayed[randomSong] != 0)
+    while (k <= 4)
     {
-        do {
-            randomSong = rand() % songs + 1;
-            if (songsPlayed[randomSong] == 0)
-            {
-                songfound = 1;
-            }
-        } while (songfound != 1);
-    }
-
-    int listloop = 1;
-
-    if (listloop != randomSong && pCur->pNext != NULL)
-    {
-        pCur = pCur->pNext;
-        listloop++;
-    }
-
-        printf("Artist %s", pCur->Data.Artist);
-        printf("Album %s", pCur->Data.Album);
-        printf("Song %s", pCur->Data.Song);
-        printf("Genre %s", pCur->Data.Genre);
-        printf("Duration %d:%d", pCur->Data.Length.minutes, pCur->Data.Length.seconds);
-        printf("Times Player %d", pCur->Data.times_played);
-        printf("Rating %d", pCur->Data.Rating);
+        i = rand() % 10 + 1;
+        printf("Artist %s", cur[i]);
+        printf("Album %s", cur[i]);
+        printf("Song %s", cur[i]);
+        printf("Genre %s", cur[i]);
+        printf("Duration %d:%d", cur[i], cur[i]);
+        printf("Times Player %d", cur[i]);
+        printf("Rating %d", cur[i]);
 
         //Sleep function will run for 5 seconds then go into the next count
         Sleep(5000);
-        
+        k++;
+    }
 
     system("cls");
 
@@ -386,71 +402,97 @@ int insert(List** pHead, Record newRecord)
 
    
 
-    char temp[50];
+    char choice[50];
     printf("Please enter the new artist");
-    while ((getchar()) != "\n");
-    fgets(temp, 50, stdin);
-    temp[strlen(temp) - 1] = NULL;
-    strcpy(newSong->Data.Artist, temp);
+    getchar();
+    fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
+    choice[strlen(choice) - 1] = '\0';
+    strcpy(newSong->Data.Artist, choice);
 
 
     printf("Please enter the New Album");
-    while ((getchar()) != "\n");
-    fgets(temp, 50, stdin);
-    temp[strlen(temp) - 1] = NULL;
-    strcpy(newSong->Data.Album, temp);
+    getchar();
+    fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
+    choice[strlen(choice) - 1] = '\0';
+    strcpy(newSong->Data.Album, choice);
 
 
     printf("Please enter the New Song Title");
-    while ((getchar()) != "\n");
-    fgets(temp, 50, stdin);
-    temp[strlen(temp) - 1] = NULL;
-    strcpy(newSong->Data.Song, temp);
+    getchar();
+    fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
+    choice[strlen(choice) - 1] = '\0';
+    strcpy(newSong->Data.Song, choice);
 
 
     printf("Please enter the New Genre");
-    while ((getchar()) != "\n");
-    fgets(temp, 50, stdin);
-    temp[strlen(temp) - 1] = NULL;
-    strcpy(newSong->Data.Genre, temp);
+    getchar();
+    fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
+    choice[strlen(choice) - 1] = '\0';
+    strcpy(newSong->Data.Genre, choice);
 
 
-    int *min = 0, *sec = 0;
+    int min = 0, sec = 0;
     printf("Please Enter the Amount of Minutes");
-    scanf("%d", min);
+    scanf("%d", &min);
     newSong->Data.Length.minutes = min;
     printf("Please Enter the Amount of Seconds");
-    scanf("%d", min);
+    scanf("%d", &min);
     newSong->Data.Length.seconds = sec;
 
     int timesPlayed = 0;
-    printf("Please enter how many times you have played the song");
-    scanf("%d", timesPlayed);
-    newSong->Data.times_played = timesPlayed;
+    do
+    {
+       
+        printf("Please enter how many times you have played the song");
+        scanf("%d\n", &timesPlayed);
+        newSong->Data.times_played = timesPlayed;
+        if (timesPlayed < 0)
+        {
+            printf("Please enter an amount greater then 0\n");
+        }
+    } while (timesPlayed < 0);
 
+   
     int rating = 0;
-    printf("Please enter your intial rating");
-    scanf("%d", rating);
-    newSong->Data.Rating = rating;
+    do
+    {
+        printf("Please enter your intial rating:");
+        scanf("%d\n", &rating);
+        newSong->Data.Rating = rating;
 
-    insert_at_front(newSong,newRecord);
-
+        if ((rating < 1) & (rating > 5))
+        {
+            printf("Please enter a rating on the scale 1 through 5\n");
+        }
+        
+    } while ((rating < 1) & (rating > 5));
+    
+    insert_at_front(newSong, newRecord);
     return 0;
 }
 
 void delete(List** plist)
 {
     Node** pHead = plist;
-    char temp[50];
+    char choice[50];
 
     printf("Enter Song to Delete");
-    while ((getchar()) != "\n");
-    fgets(temp, 50, stdin);
-    temp[strlen(temp) - 1] = NULL;
+    getchar();
+    fgets(choice, 50, stdin);
+    choice[strlen(choice) - 1] = '\n';
+    choice[strlen(choice) - 1] = '\0';;
 
-    if (strcmp(temp, (*pHead)->Data.Song) == 0)
+    while (strcmp(choice, (*pHead)->Data.Song) != 0)
     {
-       Record *temp = pHead;
+        pHead = (*pHead)->pNext;
+    };
+    if (strcmp(choice, (*pHead)->Data.Song) == 0)
+    {
+       Node *temp = pHead;
        pHead = (*pHead)->pNext;
        free(temp);
 
@@ -463,28 +505,13 @@ void delete(List** plist)
 
 }
 
-void exit_function(struct List** pHead, FILE* infile)
-{
-    struct node* current = pHead;
 
-    while (current->pNext != NULL)
-    {
-        current = current->pNext;
-    }
-
-    while (current->pNext != NULL)
-    {
-        fprintf(infile, "%s,%s,%s,%s,%d:%d,%d,%d", current->Data.Artist, current->Data.Album, current->Data.Song, current->Data.Genre, current->Data.Length.minutes, current->Data.Length.seconds, current->Data.times_played, current->Data.Rating);
-
-        current = current->pPrev;
-    }
-}
 
 void sort(List* pHead)
 {
     
     int choice = 0;
-    printf("Please select which one you would like to Sort by");
+    printf("Please select which one you would like to Sort by\n");
     printf("1) Artist\n2)Album\n3)Rating\n4)Times Played\n");
     scanf("%d", &choice);
 
@@ -492,9 +519,11 @@ void sort(List* pHead)
     {
     case 1:
         //Artist sort
+        sortbyartist(pHead);
         break;
     case 2:
         //Album Sort
+        sortbyalbum(pHead);
         break;
     case 3:
         //Rating Sort
@@ -533,11 +562,11 @@ void SortByRank(List* pHead)
     do
     {
         swapped = 0;
-        ptr1 = pHead;
+        ptr1 = pHead->pHead;
 
         while (ptr1->pNext != lptr)
         {
-            if (ptr1->Data.Rating > ptr1->pNext->Rating)
+            if (ptr1->Data.Rating > ptr1->pNext->Data.Rating)
             {
                 swap_rating(ptr1, ptr1->pNext);
                 swapped = 1;
@@ -559,8 +588,8 @@ void swap_timesPlayed(Node* ptr1, Node* ptr2)
 void SortByTimesPlayed(List* pHead)
 {
     int swapped, i;
-    Node* ptr1;
-    Node* lptr = NULL;
+    Node *ptr1;
+    Node *lptr = NULL;
 
     if (pHead == NULL)
     {
@@ -570,14 +599,15 @@ void SortByTimesPlayed(List* pHead)
     do
     {
         swapped = 0;
-        ptr1 = pHead;
+        ptr1 = pHead->pHead;
 
         while (ptr1->pNext != lptr)
         {
-            if (ptr1->Data.times_played > ptr1->pNext->times_played)
+            if (ptr1->Data.times_played > ptr1->pNext->Data.times_played)
             {
                 swap_timesPlayed(ptr1, ptr1->pNext);
                 swapped = 1;
+                
             }
             ptr1 = ptr1->pNext;
         }
@@ -586,3 +616,50 @@ void SortByTimesPlayed(List* pHead)
 
 }
 
+int sortbyartist(List* pHead) //Insert in order function, inserting by A-Z
+{
+   
+
+    
+}
+
+int sortbyalbum(List* pHead) //Insert in order function, inserting by A-Z
+{
+    int k, i;
+    Node* ptr1[50]={NULL};
+    Node* ptr2[50]={NULL};
+    Node *temp[50] = { NULL };
+    
+
+    if (pHead == NULL)
+    {
+        return;
+    }
+    for (i = 0; i < 10; i++)
+    {
+        ptr1[0] = pHead->pHead;
+    }
+    for (i = 0; i < 10; i++)
+    {
+        for (k = 0; k < 10; k++)
+        {
+            ptr2[k] = ptr1[i]->pNext;
+            if (strcmp(ptr1[i]->Data.Album, ptr2[k]->Data.Album) > 0)
+            {
+                strcpy(temp, ptr1[i]);
+                strcpy(ptr1[i], ptr2[k]);
+                strcpy(ptr2[k], temp);
+
+            }
+            ptr1[i] = ptr1[i]->pNext;
+            k++;
+        }
+    }
+       
+        for (i= 0; i < 10; i++)
+        {
+            puts(ptr1[i]);
+        }
+    
+
+}

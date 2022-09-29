@@ -34,8 +34,8 @@ typedef struct record
 typedef struct node
 {
 	Record Data;
-	struct record* pPrev;
-	struct record* pNext;
+	struct node* pPrev;
+	struct node* pNext;
 
 }Node;
 
@@ -49,19 +49,21 @@ Node* make_node(Record newRecord);
 void insert_at_front(List* pHead, Record newRecord);
 int parseData(char* lines, Record* music_record, int lineNumber);
 void display(const List* pList);
-void store(struct List** pHead, FILE* infile);
+void store(List* pHead, FILE* infile);
 void edit(struct List* head);
 void rate(List* head);
 void play(List* pHead);
 void shuffle(List* pHead);
-int insert(List** pHead, Record *newRecord);
+int insert(List** pHead, Record newRecord);
 void delete(List** plist);
-void exit_function(struct List** pHead, FILE* infile);
+void exit_function(Node** pHead, FILE* infile);
 void sort(List* pHead);
 void swap_rating(Node* ptr1, Node* ptr2);
 void SortByRank(List* pHead);
 void swap_timesPlayed(Node* ptr1, Node* ptr2);
 void SortByTimesPlayed(List* pHead);
+int sortbyartist(List* plist);
+int sortbyalbum(List* pHead);
 
 
 
